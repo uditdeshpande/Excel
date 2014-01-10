@@ -1,10 +1,13 @@
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -18,7 +21,9 @@ public class ExcelGUI extends JFrame implements ActionListener{
 	JPanel root,north,west;
 	JButton browse,accept,generate;
 	JTextField filein;
-	JLabel file;
+	JLabel file,status;
+	JComboBox graphtype;
+	String[] graph=new String[] {"Stack Chart","Pie Chart","Bar Chart","Line Chart"};
 	public ExcelGUI()
 	{
 	setupUI();
@@ -47,8 +52,11 @@ public class ExcelGUI extends JFrame implements ActionListener{
 		north.add(filein);
 		north.add(browse);
 		accept=new JButton("Submit");
+		status=new JLabel("");
+		graphtype=new JComboBox(graph);
+		north.add(graphtype);
 		north.add(accept);
-		
+		north.add(status);
 		
 	}
 
@@ -62,8 +70,18 @@ public class ExcelGUI extends JFrame implements ActionListener{
 		// TODO Auto-generated method stub
 		if (e.getSource()==browse)
 		{
-		JFileChooser fc=new JFileChooser();
-		fc.showOpenDialog(this);
+			if(!filein.getText().isEmpty())
+			{
+				status.setForeground(Color.GREEN);
+				status.setText("File read successfully!");
+			}
+			else
+			{
+				status.setForeground(Color.RED);
+				status.setText("File read failed!");
+				
+			}	
+			
 		
 		}
 	}

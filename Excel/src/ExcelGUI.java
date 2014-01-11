@@ -1,10 +1,18 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.ImageObserver;
+import java.awt.image.ImageProducer;
+import java.io.File;
+import java.io.IOException;
+
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -14,6 +22,15 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 public class ExcelGUI extends JFrame implements ActionListener{
 
@@ -28,6 +45,7 @@ public class ExcelGUI extends JFrame implements ActionListener{
 	DefaultTableModel tm;
 	DefaultComboBoxModel xme=new DefaultComboBoxModel();
 	DefaultComboBoxModel yme=new DefaultComboBoxModel();
+	
 	public ExcelGUI()
 	{
 		this.setLayout(new BorderLayout());
@@ -59,7 +77,6 @@ public class ExcelGUI extends JFrame implements ActionListener{
 		south=new JPanel(new FlowLayout(FlowLayout.CENTER));
 		east=new JPanel();
 		east.setLayout(new BoxLayout(east,BoxLayout.Y_AXIS));
-		
 		filein=new JTextField();
 		file=new JLabel("Please choose the excel file");
 		browse=new JButton("Browse");
@@ -73,7 +90,7 @@ public class ExcelGUI extends JFrame implements ActionListener{
 		save_chart=new JButton("  Save Chart  ");
 		clear=new JButton("Clear Screen");
 		String[] head={"Details","Column 1","Column2"};
-		Object[][] data= {{"A",1,2},{"B",3,4},{"C",5,6}};
+		Object[][] data= {{"A",100,2},{"B",34,4},{"C",500,6}};
 		tm=new DefaultTableModel(data,head);
 		table=new JTable(tm);
 		pane=new JScrollPane(table);
@@ -129,6 +146,8 @@ public class ExcelGUI extends JFrame implements ActionListener{
 		
 	//	temp=new JButton("Temp");
 	//	imgr.add(temp);
+		
+				
 	//	tmp=new JLabel("Tmp");
 	//	imgr.add(tmp);
 		
@@ -150,6 +169,7 @@ public class ExcelGUI extends JFrame implements ActionListener{
 		delrow.addActionListener(this);
 		creategraph.addActionListener(this);
 		refresh.addActionListener(this);
+		
 	//	temp.addActionListener(this);
 	}
 	@Override
@@ -200,6 +220,18 @@ public class ExcelGUI extends JFrame implements ActionListener{
 			refreshlogic();
 				
 		}
+		else if(e.getSource()==accept)
+		{
+			//createPieChart();
+			//createLineChart();
+			createBarChart();
+			imgr.removeAll();
+			ImageIcon img=new ImageIcon("D:\\chart.jpg");
+			JLabel image=new JLabel(img);
+			imgr.add(image);
+			imgr.revalidate();
+			imgr.repaint();
+		}
 		
 		
 		
@@ -207,17 +239,70 @@ public class ExcelGUI extends JFrame implements ActionListener{
 
 	void createBarChart()
 	{
-		
+		 DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+		 for(int i=0;i<tm.getRowCount();i++)
+			{
+				dataset.setValue((Number)tm.getValueAt(i,(int) xme.getSelectedItem()),"",(Comparable) tm.getValueAt(i, 0));
+			}
+	 JFreeChart chart = ChartFactory.createBarChart("Bar Chart",
+		 "Salesman", "Profit", dataset, PlotOrientation.VERTICAL,
+		 false, true, false);
+		 try {
+		 ChartUtilities.saveChartAsJPEG(new File("D:\\chart.jpg"), chart, 800, 600);
+		 } catch (IOException e) {
+		 System.err.println("Problem occurred creating chart.");
+		 }
 	}
 	
 	void createPieChart()
 	{
-		
+		DefaultPieDataset pd=new DefaultPieDataset();
+		for(int i=0;i<tm.getRowCount();i++)
+		{
+			pd.setValue(tm.getValueAt(i, 0).toString(),(Number)tm.getValueAt(i,(int) xme.getSelectedItem()));
+			
+		}
+		System.out.print(xme.getSelectedItem());
+		 JFreeChart chart = ChartFactory.createPieChart
+				 ("Pie Chart", // Title
+				 pd, // Dataset
+				 true, // Show legend
+				 true, // Use tooltips
+				 false // Configure chart to generate URLs?
+				 );
+		 try {
+			 ChartUtilities.saveChartAsJPEG(new File("D:\\chart.jpg"), chart, 800, 600);
+			 } catch (Exception e) {
+			 System.out.println("Problem occurred creating chart.");
+			 }
 	}
 	
 	void createLineChart()
 	{
-		
+		 XYSeries s = new XYSeries("XY Graph");
+		 for(int i=0;i<tm.getRowCount();i++)
+			{
+				s.add((Number)tm.getValueAt(i,(int) xme.getSelectedItem()),(Number)tm.getValueAt(i,(int) yme.getSelectedItem()));
+			}
+	
+		 XYSeriesCollection dataset = new XYSeriesCollection();
+		 dataset.addSeries(s);
+		 // Generate the graph
+		 JFreeChart chart = ChartFactory.createXYLineChart(
+		 "XY Chart", // Title
+		 "x-axis", // x-axis Label
+		 "y-axis", // y-axis Label
+		 dataset, // Dataset
+		 PlotOrientation.VERTICAL, // Plot Orientation
+		 true, // Show Legend
+		 true, // Use tooltips
+		 false // Configure chart to generate URLs?
+		 );
+		 try {
+		 ChartUtilities.saveChartAsJPEG(new File("D:\\chart.jpg"), chart, 800, 600);
+		 } catch (IOException e) {
+		 System.err.println("Problem occurred creating chart.");
+		 }
 	}
 	
 	void createStackChart()
@@ -234,6 +319,7 @@ public class ExcelGUI extends JFrame implements ActionListener{
 			yme.addElement(i);
 		
 	}
+		
 	}
 	
 }

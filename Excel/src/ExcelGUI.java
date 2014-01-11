@@ -1,44 +1,33 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
-
 
 public class ExcelGUI extends JFrame implements ActionListener{
 
 	JPanel root,north,east,south,tabr,imgr,tabt,tabb;
-	JButton browse,accept,generate,submit,invaxis,about,help,save_chart,clear,addrow,addcol,cleardata,delrow,delcol;
+	JButton browse,accept,generate,submit,invaxis,about,help,save_chart,clear,addrow,addcol,cleardata,delrow,creategraph,temp,refresh;
 	JTextField filein;
-	JLabel file,status;
-	JComboBox graphtype;
+	JLabel file,status,tmp;
+	JComboBox graphtype,xaxis,yaxis;
 	JTable table;
 	String[] graph=new String[] {"Stack Chart","Pie Chart","Bar Chart","Line Chart"};
 	JScrollPane pane;
 	DefaultTableModel tm;
-	
+	DefaultComboBoxModel xme=new DefaultComboBoxModel();
+	DefaultComboBoxModel yme=new DefaultComboBoxModel();
 	public ExcelGUI()
 	{
 		this.setLayout(new BorderLayout());
@@ -58,6 +47,7 @@ public class ExcelGUI extends JFrame implements ActionListener{
 	
 	void setupUI()
 	{
+		//init
 		
 		north=new JPanel(new FlowLayout(FlowLayout.LEFT));
 		root=new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -70,6 +60,31 @@ public class ExcelGUI extends JFrame implements ActionListener{
 		east=new JPanel();
 		east.setLayout(new BoxLayout(east,BoxLayout.Y_AXIS));
 		
+		filein=new JTextField();
+		file=new JLabel("Please choose the excel file");
+		browse=new JButton("Browse");
+		accept=new JButton("Submit");
+		xaxis=new JComboBox(xme);
+		yaxis=new JComboBox(yme);
+		refresh=new JButton("      Refresh    ");
+		invaxis=new JButton("  Invert Axis   ");
+		about=new JButton("    About Us    ");
+		help=new JButton("         Help        ");
+		save_chart=new JButton("  Save Chart  ");
+		clear=new JButton("Clear Screen");
+		String[] head={"Details","Column 1","Column2"};
+		Object[][] data= {{"A",1,2},{"B",3,4},{"C",5,6}};
+		tm=new DefaultTableModel(data,head);
+		table=new JTable(tm);
+		pane=new JScrollPane(table);
+		addrow=new JButton("Add ROW");
+		addcol=new JButton("Add COL");
+		cleardata=new JButton("Clear Data");
+		delrow=new JButton("Delete Row");
+		creategraph=new JButton("Create Graph");
+		status=new JLabel("");
+		graphtype=new JComboBox(graph);
+		
 		
 		this.add(north, BorderLayout.NORTH);
 		this.add(root,BorderLayout.CENTER);
@@ -78,27 +93,22 @@ public class ExcelGUI extends JFrame implements ActionListener{
 		//NORTH PANEL UI COMPONENTS
 		
 		//this.add(north);
-		filein=new JTextField();
 		filein.setColumns(50);
-		file=new JLabel("Please choose the excel file");
 		north.add(file);
-		browse=new JButton("Browse");
 		north.add(filein);
 		north.add(browse);
-		accept=new JButton("Submit");
-		status=new JLabel("");
-		graphtype=new JComboBox(graph);
 		north.add(graphtype);
+		refreshlogic();
+		north.add(new JLabel("X-Axis"));
+		north.add(xaxis);
+		north.add(new JLabel("Y-Axis"));
+		north.add(yaxis);
 		north.add(accept);
 		north.add(status);
 		
 		
 		//WEST COMPONENTS ADD
-		invaxis=new JButton("  Invert Axis   ");
-		about=new JButton("    About Us    ");
-		help=new JButton("         Help        ");
-		save_chart=new JButton("  Save Chart  ");
-		clear=new JButton("Clear Screen");
+		east.add(refresh);
 		east.add(invaxis);
 		east.add(about);
 		east.add(help);
@@ -109,24 +119,18 @@ public class ExcelGUI extends JFrame implements ActionListener{
 //		submit=new JButton("Submit");
 //		south.add(submit);
 //		
-		String[] head={"Details","Column 1","Column2"};
-		Object[][] data= {{"A",1,2},{"B",3,4},{"C",5,6}};
-		tm=new DefaultTableModel(data,head);
-		table=new JTable(tm);
-		pane=new JScrollPane(table);
 		tabt.add(pane);
-		addrow=new JButton("Add ROW");
-		addcol=new JButton("Add COL");
-		cleardata=new JButton("Clear Data");
-		delrow=new JButton("Delete Row");
-		delcol=new JButton("Delete Column");
 		tabb.add(addrow);
 		tabb.add(addcol);
 		tabb.add(cleardata);
 		tabb.add(delrow);
-		tabb.add(delcol);
+		tabb.add(creategraph);
 		//actual logic
 		
+	//	temp=new JButton("Temp");
+	//	imgr.add(temp);
+	//	tmp=new JLabel("Tmp");
+	//	imgr.add(tmp);
 		
 	}
 
@@ -144,7 +148,9 @@ public class ExcelGUI extends JFrame implements ActionListener{
 		about.addActionListener(this);
 		clear.addActionListener(this);
 		delrow.addActionListener(this);
-		delcol.addActionListener(this);
+		creategraph.addActionListener(this);
+		refresh.addActionListener(this);
+	//	temp.addActionListener(this);
 	}
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -169,23 +175,65 @@ public class ExcelGUI extends JFrame implements ActionListener{
 		{
 			Object []temp={"",null,null};
 			tm.insertRow(table.getSelectedRow()+1,temp);
-			tm.addRow(temp);
+			
 		}
 		else if(e.getSource()==addcol)
 		{
 			tm.addColumn("Column"+tm.getColumnCount());
+			refreshlogic();
 		}
 		else if(e.getSource()==cleardata)
 		{
 			tm.setRowCount(0);
+			
 		}
 		else if(e.getSource()==delrow)
 		{
 			tm.removeRow(table.getSelectedRow());
 		}
-		else if(e.getSource()==delcol)
+		else if(e.getSource()==creategraph)
 		{
 			
 		}
+		else if(e.getSource()==refresh)
+		{
+			refreshlogic();
+				
+		}
+		
+		
+		
 	}
+
+	void createBarChart()
+	{
+		
+	}
+	
+	void createPieChart()
+	{
+		
+	}
+	
+	void createLineChart()
+	{
+		
+	}
+	
+	void createStackChart()
+	{
+		
+	}
+	
+	void refreshlogic()
+	{
+		
+		xme.removeAllElements();yme.removeAllElements();
+		for(int i=1;i<table.getColumnCount();i++)
+			{xme.addElement(i);
+			yme.addElement(i);
+		
+	}
+	}
+	
 }

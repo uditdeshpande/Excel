@@ -22,20 +22,22 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
 
 
 public class ExcelGUI extends JFrame implements ActionListener{
 
 	JPanel root,north,east,south,tabr,imgr,tabt,tabb;
-	JButton browse,accept,generate,submit,invaxis,about,help,save_chart,clear,addrow,addcol;
+	JButton browse,accept,generate,submit,invaxis,about,help,save_chart,clear,addrow,addcol,cleardata,delrow,delcol;
 	JTextField filein;
 	JLabel file,status;
 	JComboBox graphtype;
 	JTable table;
 	String[] graph=new String[] {"Stack Chart","Pie Chart","Bar Chart","Line Chart"};
 	JScrollPane pane;
-	
+	DefaultTableModel tm;
 	
 	public ExcelGUI()
 	{
@@ -107,17 +109,24 @@ public class ExcelGUI extends JFrame implements ActionListener{
 //		submit=new JButton("Submit");
 //		south.add(submit);
 //		
-		String[] head={"Details","Attribute A","Attribute B"};
+		String[] head={"Details","Column 1","Column2"};
 		Object[][] data= {{"A",1,2},{"B",3,4},{"C",5,6}};
-		table=new JTable(data,head);
-		
+		tm=new DefaultTableModel(data,head);
+		table=new JTable(tm);
 		pane=new JScrollPane(table);
-		
-		table.setFillsViewportHeight(true);
 		tabt.add(pane);
 		addrow=new JButton("Add ROW");
 		addcol=new JButton("Add COL");
-		tabb.add(addrow);tabb.add(addcol);
+		cleardata=new JButton("Clear Data");
+		delrow=new JButton("Delete Row");
+		delcol=new JButton("Delete Column");
+		tabb.add(addrow);
+		tabb.add(addcol);
+		tabb.add(cleardata);
+		tabb.add(delrow);
+		tabb.add(delcol);
+		//actual logic
+		
 		
 	}
 
@@ -125,6 +134,17 @@ public class ExcelGUI extends JFrame implements ActionListener{
 	{
 		accept.addActionListener(this);
 		browse.addActionListener(this);
+		addrow.addActionListener(this);
+		addcol.addActionListener(this);
+		help.addActionListener(this);
+		browse.addActionListener(this);
+		cleardata.addActionListener(this);
+		invaxis.addActionListener(this);
+		save_chart.addActionListener(this);
+		about.addActionListener(this);
+		clear.addActionListener(this);
+		delrow.addActionListener(this);
+		delcol.addActionListener(this);
 	}
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -141,9 +161,31 @@ public class ExcelGUI extends JFrame implements ActionListener{
 				status.setForeground(Color.RED);
 				status.setText("File read failed!");
 			}	
-			table.addColumn(new TableColumn());
 			
 		
+		}
+		
+		else if(e.getSource()==addrow)
+		{
+			Object []temp={"",null,null};
+			tm.insertRow(table.getSelectedRow()+1,temp);
+			tm.addRow(temp);
+		}
+		else if(e.getSource()==addcol)
+		{
+			tm.addColumn("Column"+tm.getColumnCount());
+		}
+		else if(e.getSource()==cleardata)
+		{
+			tm.setRowCount(0);
+		}
+		else if(e.getSource()==delrow)
+		{
+			tm.removeRow(table.getSelectedRow());
+		}
+		else if(e.getSource()==delcol)
+		{
+			
 		}
 	}
 }
